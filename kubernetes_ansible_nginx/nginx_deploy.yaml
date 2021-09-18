@@ -24,7 +24,7 @@ spec:
         image: docker.io/dockernassimchet/nginx_80
         volumeMounts:
         - name: nginx-proxy-app
-          mountPath: /html/files
+          mountPath: /tmp/
       - name: nginx
         image: docker.io/dockernassimchet/nginx_80
         ports:
