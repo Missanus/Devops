@@ -23,7 +23,7 @@ spec:
       - name: webbpp 
         image: docker.io/dockernassimchet/nginx_80
         volumeMounts:
-        - name: nginx-proxy-config
+        - name: nginx-proxy-app
           mountPath: /html/files
       - name: nginx
         image: docker.io/dockernassimchet/nginx_80
