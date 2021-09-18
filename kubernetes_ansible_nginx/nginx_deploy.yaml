@@ -8,6 +8,9 @@ metadata:
     zone: fr
     env: dev
 spec:
+  volumes:
+  - name: vol-tmp-nass
+    emptyDir: {}
   replicas: 1
   selector:
     matchLabels:
