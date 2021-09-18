@@ -20,7 +20,7 @@ spec:
         app: nginx
     spec:
       volumes:
-      - name: vol_tmp
+      - name: vol-tmp
         emptyDir: {}
       containers:
       - name: webbpp 
