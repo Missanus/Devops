@@ -8,9 +8,6 @@ metadata:
     zone: fr
     env: dev
 spec:
-  volumes:
-  - name: vol-tmp-nass
-    emptyDir: {}
   replicas: 1
   selector:
     matchLabels:
@@ -22,6 +19,9 @@ spec:
         env: dev
         app: nginx
     spec:
+      volumes:
+      - name: vol_tmp
+        emptyDir: {}
       containers:
       - name: webbpp 
         image: docker.io/dockernassimchet/nginx_80
