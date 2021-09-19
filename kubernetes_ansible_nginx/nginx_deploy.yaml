@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: namesp-dev
   labels:
     app: nginx
     zone: fr
@@ -19,21 +20,33 @@ spec:
         env: dev
         app: nginx
     spec:
-      volumes:
-      - name: vol-tmp
-        emptyDir: {}
       containers:
-      - name: webbpp 
-        image: docker.io/dockernassimchet/nginx_80
-        volumeMounts:
-        - name: nginx-proxy-app
-          mountPath: /tmp/
-      - name: nginx
-        image: docker.io/dockernassimchet/nginx_80
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        - name: nginx-proxy-config
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
-
+        - name: webapp 
+          image: alpine
+          volumeMounts:
+          - name: bdd-secret
+            mountPath: /tmp/bbdsecret.file
+            subPath: bbdsecret.file
+          command: ["/bin/sh", "-c"]
+          args:
+            - while true; do
+                date >> /tmp/index.html;
+                sleep 5;
+              done
+        - name: nginx-reverse
+          image: docker.io/dockernassimchet/nginx_80
+          #command: ["nginx", "-g", "daemon off;"]
+          ports:
+            - containerPort: 80
+          volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/toto/nginx.conf
+            subPath: nginx.conf
+      #restartPolicy: Always
+      volumes:
+          - name: nginx-config
+            configMap:
+              name: nginx-config-file-one
+          - name: bdd-secret
+            secret:
+              secretName: nginx-secret-file-one
