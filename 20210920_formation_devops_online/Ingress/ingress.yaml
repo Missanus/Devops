@@ -1,4 +1,4 @@
---- create the classs name 
+---  
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -8,14 +8,14 @@ spec:
   - host: game1.foo.org
     http:
       paths:
-      - path: /game1
+      - path: "/" #game1
         pathType: Prefix
         backend:
           service:
             name: nginx-service1
             port:
               number: 80
-      - path: /game2
+      - path: "/" #/game2
         pathType: Prefix
         backend:
           service:

@@ -8,7 +8,10 @@ metadata:
     app: nginx
 spec:
   ports:
-  - port: 80
+    - name: "http"
+      protocol: TCP
+      port: 80
+      targetPort: 80
   selector:
     app: nginx1
 
@@ -21,7 +24,10 @@ metadata:
     app: nginx
 spec:
   ports:
-  - port: 80
+    - name: "http"
+      protocol: TCP
+      port: 80
+      targetPort: 80
   selector:
     app: nginx2
 ---
