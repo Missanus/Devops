@@ -23,6 +23,7 @@ data:
    "value 2 file"
    "add enw colone"
    "hello from the second container"
+   "latest ligne"
   nginx.conf: |
 
 
