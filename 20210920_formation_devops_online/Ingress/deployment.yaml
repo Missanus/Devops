@@ -7,11 +7,11 @@ metadata:
 spec:
   selector: # au niveau du pod
     matchLabels:
-       app: 'nginx-test-1'
+       app: 'nginx1' #'nginx-test-1'
   template:
    metadata:
     labels:
-       app: nginx1 #'nginx-test-1'
+       app: 'nginx1' #'nginx-test-1'
    spec:
      containers:
       - name: nginx
@@ -34,11 +34,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-       app: 'nginx-test-2'
+       app: 'nginx2' #'nginx-test-2'
   template:
    metadata:
     labels:
-       app: nginx2 #'nginx-test-2'
+       app: 'nginx2' #'nginx-test-2'
    spec:
      containers:
       - name: nginx
@@ -50,7 +50,7 @@ spec:
       - name: config-volume
         configMap:
           name: nginx-test-2
-#          items:
+#a          items:
 #             - key: 
 #            - key: "test-value"
 #              path: "index.html"
