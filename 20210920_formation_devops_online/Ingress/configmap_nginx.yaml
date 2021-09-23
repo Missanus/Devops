@@ -21,6 +21,7 @@ data:
     sleep 2; echo "hello from second ligne"
   index.html: |
    "value 2 file"
+   "add enw colone"
    "hello from the second container"
   nginx.conf: |
 
