@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: 'nginx-test-1'
 data:
-test-value: "value1"
+  test-value: "value1"
 
 ---
 
@@ -12,7 +12,15 @@ kind: ConfigMap
 metadata:
   name: "nginx-test-2"
 data:
-  test-value: "value2"
+  special.type: charm
+  fileprop.propertise: |
+    name=nassim
+    salary=oui
+  filesh.sh: |
+    echo  "sleep 1; echo hello from davison"
+    sleep 2; echo "hello from second ligne"
+  test-value: |
+   "value2"
   nginx.conf: |
 
 
