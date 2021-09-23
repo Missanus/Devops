@@ -13,7 +13,7 @@ metadata:
   name: "nginx-test-2"
 data:
   special.type: charm
-  fileprop.propertise: |
+  fileprop.properties: |
     name=nassim
     salary=oui
   filesh.sh: |
