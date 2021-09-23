@@ -12,7 +12,7 @@ kind: ConfigMap
 metadata:
   name: "nginx-test-2"
 data:
-  test-value: "value2"
+  test-value.file: "value2"
   nginx.conf: |
 
 
