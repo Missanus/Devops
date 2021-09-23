@@ -1,4 +1,5 @@
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,11 +11,11 @@ spec:
   template:
    metadata:
     labels:
-       app: 'nginx-test-1'
+       app: nginx1 #'nginx-test-1'
    spec:
      containers:
       - name: nginx
-        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        image: nginx #registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
         volumeMounts:
         - name: config-volume
           mountPath: /usr/share/nginx/html
@@ -37,11 +38,11 @@ spec:
   template:
    metadata:
     labels:
-       app: 'nginx-test-2'
+       app: nginx2 #'nginx-test-2'
    spec:
      containers:
       - name: nginx
-        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        image: nginx #registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
         volumeMounts:
         - name: config-volume
           mountPath: /usr/share/nginx/html
