@@ -19,8 +19,9 @@ data:
   filesh.sh: |
     echo  "sleep 1; echo hello from davison"
     sleep 2; echo "hello from second ligne"
-  test-value: |
-   "value2"
+  index.html: |
+   "value 2 file"
+   "hello from the second container"
   nginx.conf: |
 
 

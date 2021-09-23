@@ -49,8 +49,10 @@ spec:
       - name: config-volume
         configMap:
           name: nginx-test-2
-          items:
-            - key: "test-value"
-              path: "index.html"
-            - key: "nginx.conf"
+#          items:
+#             - key: 
+#            - key: "test-value"
+#              path: "index.html"
+#            - key: "nginx.conf"
+#	       path: "nginx.conf"	
 ---
