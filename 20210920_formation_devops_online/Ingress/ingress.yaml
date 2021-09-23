@@ -15,7 +15,10 @@ spec:
             name: nginx-service1
             port:
               number: 80
-      - path: "/" #/game2
+  - host: game2.foo.org
+    http:
+      paths:
+      - path: "/" #game2
         pathType: Prefix
         backend:
           service:
