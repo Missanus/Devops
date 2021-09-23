@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: configMap
+metadata:
+  name: 'nginx-test-1'
+data:
+test-value: "value1"
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "nginx-test-2"
+data:
+  test-value: "value2"
+  nginx.conf: |
+
+
+    upstream webapp {
+      server 127.0.0.1:5000
+    }

@@ -1,0 +1,37 @@
+--- create the classs name 
+# download api https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal
+
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+spec:
+  rules:
+  - host: game1.foo.org
+    http:
+      paths:
+      - path: /game1
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service1
+            port:
+              number: 80
+      - path: /game2
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service2
+            port:
+              number: 80
+  ingressClassName: nginx
+---

@@ -1,0 +1,1648 @@
+--- http://meetingwords.com/a5EhGh3e4P
+
+=> 1 Cron job 
+    name: awesome-job
+    Triggers every Minutes
+    use a pod with a container that have an image busybox
+    the job is to execute a wget on the service awesome-service
+    to grabe the /volume/index.html
+    6 completions
+    2 in parallel
+    FORBID concurrency policy
+    Never restart on failure
+    
+    
+
+====================
+
+creer un fichier Vagrantfile
+
+---
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define "kubmaster" do |kub|
+    kub.vm.box = "kwilczynski/ubuntu-16.04-docker"
+    kub.vm.hostname = 'kubmaster'
+
+    kub.vm.network :private_network, ip: "192.168.0.40"
+
+    kub.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--name", "kubmaster"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+
+  config.vm.define "kubnode" do |kubnode|
+    kubnode.vm.box = "kwilczynski/ubuntu-16.04-docker"
+    kubnode.vm.hostname = 'kubnode'
+
+    kubnode.vm.network :private_network, ip: "192.168.0.41"
+
+    kubnode.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--name", "kubnode"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+end
+
+---
+
+vagrant up
+
+vagrant ssh kubmaster
+vagrant ssh kubnode
+
+--- Sur tous les noeuds:
+sudo su
+swapoff -a
+vi /etc/fstab
+
+apt-get update && apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+apt-get update && apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+
+mkdir -p /etc/docker
+
+cat <<EOF | tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+systemctl restart kubelet
+
+systemctl enable kubelet
+
+--- Sur le master uniquement  VERIFIEZ LES IPs
+
+kubeadm init --apiserver-advertise-address=192.168.0.40 --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16
+
+--- sur le master SANS LE ROOT
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+---- sur le master 
+curl https://docs.projectcalico.org/manifests/calico.yaml -O
+vi calico.yaml
+modifier CALICO_IPV4POOL_CIDR
+kubectl apply -f calico.yaml
+
+check le status 
+
+kubectl get pods -A
+
+sudo kubeadm token create --print-join-command
+
+--- Sur les nodes
+
+sudo kubeadm join <output du log d install>
+
+--- Sur tous les noeuds SPECIFIC VIRTUALBOX
+
+edit /etc/hosts
+
+remplacer les ips par master et node au lieu de 127.0.1.1
+
+=================
+
+kubectl api-resources --namespaced=false
+
+
+kubectl config view
+kubectl config get-contexts
+
+======== context
+
+kubectl create ns demo
+kubectl create deployment nginx --image nginx --n demo
+kubectl config set-context demo-context --namespace demo --user kubernetes-admin --cluster kubernetes
+kubectl config use-context demo-context
+
+retrournez dans le context kubernetes-admin@kubernetes
+
+======= resources
+
+metrics-server :  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+curl https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml -L -O
+
+modifier deployment 
+args:
+- --kubelet-insecure-tls
+
+kubectl apply -f components.yaml
+
+kubectl logs -f metrics-server-6dfddc5fb8-8ktt2 -n kube-system
+
+kubectl top node
+
+==== limits and requests
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        memory: 200M
+      limits:
+        memory: 500M
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 0.1
+      limits:
+        cpu: 1
+
+==== limitrange
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-lr
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: test-lr
+  namespace: test-lr
+spec:
+  limits:
+  - type: Container
+    max:            #Acceptable max
+      memory: 512M
+      cpu: 500m
+    min:            #Acceptable min
+      memory: 50M
+      cpu: 50m
+--- 
+kubectl get lr
+kubectl describe lr test-lr
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox1
+  namespace: test-lr
+spec:
+  containers:
+  - name: busybox-cnt01
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt01; sleep 10;done"]
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "100m"
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+  - name: busybox-cnt02
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt02; sleep 10;done"]
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "100m"
+  - name: busybox-cnt03
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt03; sleep 10;done"]
+    resources:
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+  - name: busybox-cnt04
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt04; sleep 10;done"]
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-lr
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: test-lr
+  namespace: test-lr
+spec:
+  limits:
+  - default:
+      memory: 100M
+      cpu: 100m
+    defaultRequest:
+      memory: 50M
+      cpu: 50m
+    type: Container
+    max:            #Acceptable max
+      memory: 512M
+      cpu: 500m
+    min:            #Acceptable min
+      memory: 50M
+      cpu: 50m
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: storagelimits
+  namespace: test-lr
+spec:
+  limits:
+  - type: PersistentVolumeClaim
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limit-memory-ratio-pod
+  namespace: test-lr
+spec:
+  limits:
+  - maxLimitRequestRatio:
+      memory: 2
+    type: Pod
+
+=== Quotas
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-quota
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mem-cpu-demo
+  namespace: test-quota
+spec:
+  hard:
+    requests.cpu: 1
+    requests.memory: 1G
+    limits.cpu: 2
+    limits.memory: 2G
+    pods: 3
+---
+kubectl get quota -n test-quota
+kubectl describe quota  -n test-quota
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod1
+  namespace: test-quota
+spec:
+  containers:
+  - name: liveness
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 400m
+        memory: 600M
+      limits:
+        cpu: 800m
+        memory: 800M
+---
+==== Quota + priorityclass
+
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: premium
+value: 1000000 
+globalDefault: false
+description: "This priority class should be used for High priority service pods only."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: normal
+value: 1000 
+globalDefault: false
+description: "This priority class should be used for Normal priority service pods only."
+
+---
+
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-premium
+  spec:
+    hard:
+      cpu: 1
+      memory: 500M
+      pods: 3
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["premium"]
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-normal
+  spec:
+    hard:
+      cpu: 200m
+      memory: 100M
+      pods: 3
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["normal"]
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 200m
+        memory: 100M
+      limits:
+        cpu: 1
+        memory: 500M
+  priorityClassName: premium
+---
+
+=============== Jour 2
+
+--- HPA
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  selector:
+    matchLabels:
+      run: php-apache
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        image: k8s.gcr.io/hpa-example
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    run: php-apache
+spec:
+  ports:
+  - port: 80
+  selector:
+    run: php-apache
+---
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+---
+kubectl get hpa
+---
+kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+---
+targetCPUUtilizationPercentage: 20
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+spec:
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 2
+  maxReplicas: 15
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 20
+--- PV PVC et Volumes
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1G
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv1"
+---
+kubectl get pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 500M
+---
+kubectl get pvc
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: my-pvc-volume
+  volumes:
+  - name: my-pvc-volume
+    persistentVolumeClaim:
+      claimName: my-pvc
+---
+==== nodeselector
+kubectl taint nodes $(hostname) node-role.kubernetes.io/master:NoSchedule-
+
+---
+kubectl label node kubnode disk=ssd
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    kubernetes.io/hostname: kubmaster
+--- Node affinity
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      # requiredDuringSchedulingIgnoredDuringExecution:
+      #   nodeSelectorTerms:
+      #   - matchExpressions:
+      #     - key: kubernetes.io/e2e-az-name
+      #       operator: In
+      #       values:
+      #       - e2e-az1
+      #       - e2e-az2
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: disk
+            operator: In
+            values:
+            - ssd
+  containers:
+  - name: with-node-affinity
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly
+  labels:
+    friendly: high
+spec:
+  containers:
+    - name: pod-friendly
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-must
+spec:
+  containers:
+    - name: pod-friendly-must
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: friendly
+            operator: In
+            values:
+            - high
+        topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-want
+spec:
+  containers:
+    - name: pod-friendly-want
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: friendly
+              operator: In
+              values:
+              - high
+          topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-must-not
+spec:
+  containers:
+    - name: pod-friendly-must-not
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: friendly
+                operator: In
+                values:
+                  - high
+          topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-want-not
+spec:
+  containers:
+    - name: pod-friendly-want-not
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: friendly
+                  operator: In
+                  values:
+                    - high
+            topologyKey: kubernetes.io/hostname
+---
+=============================================
+
+redis:3.2-alpine
+registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+
+kubectl taint nodes $(hostname) node-role.kubernetes.io/master:NoSchedule-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - nginx
+              topologyKey: kubernetes.io/hostname
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                   - redis
+             topologyKey: kubernetes.io/hostname
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+  labels:
+    app: redis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:3.2-alpine
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                   matchExpressions:
+                     - key: app
+                       operator: In
+                       values:
+                         - redis
+              topologyKey: kubernetes.io/hostname
+=== Taints et tolerations
+
+kubectl taint node kubnode maintenance=true:NoSchedule
+
+kubectl taint node kubnode maintenance:NoSchedule-
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+      tolerations:
+      - key: maintenance
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+        ###
+     - key: "maintenance"
+       operator: "Exists"
+       effect: "NoSchedule"
+
+======= Statefulsets
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+    targetPort: 80
+  clusterIP: None
+  selector:
+    app: nginx
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv0"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv1"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv2
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv2"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv3
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv3"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv4
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv4"
+    
+--- 
+
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: manual
+      accessModes: 
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100M
+
+
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-sts
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  serviceName: nginx
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: www
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: manual
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100M
+          
+          
+---
+
+kubectl run -i --tty --image busybox:1.28 dns-test --restart=Never --rm
+
+kubernetes.io/change-cause
+
+podManagementPolicy: Parallel
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-sts
+  labels:
+    app: nginx
+spec:
+  replicas: 4
+  podManagementPolicy: Parallel
+  serviceName: nginx
+  selector:
+    matchLabels:
+      app: nginx
+  updateStrategy: #
+    type: RollingUpdate
+    rollingUpdate:
+       partition: 0
+  template:
+    metadata:
+      labels:
+        app: nginx
+      annotations:
+        kubernetes.io/change-cause: '1.19'
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:1.19
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: www
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: manual
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100M
+===
+
+kubectl rollout pause statefulset nginx-sts
+
+==== JOUR 3
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-elasticsearch
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        name: fluentd-elasticsearch
+      annotations:
+        kubernetes.io/change-cause: "v2.6.0"
+    spec:
+      tolerations:
+      # this toleration is to have the daemonset runnable on master nodes
+      # remove it if your masters can't run pods
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: fluentd-elasticsearch
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.6.0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+---
+https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+---
+https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal
+---
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
+---
+
+
+containers:
+    - name: nginx
+      image:  nginx
+      volumeMounts:
+      - name: config-volume
+        mountPath: /usr/share/nginx/html
+  volumes:
+    - name: config-volume
+      configMap:
+        name: nginx-test-1
+---
+
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-myserviceb
+spec:
+  rules:
+  - host: myserviceb.foo.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: myserviceb
+            port: 
+              number: 80
+  ingressClassName: nginx
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+spec:
+  rules:
+  - host: game1.foo.org
+    http:
+      paths:
+      - path: /game1
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service1
+            port:
+              number: 80
+      - path: /game2
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service2
+            port:
+              number: 80
+  ingressClassName: nginx
+  
+  ---
+  
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo1
+data:
+  player_initial_lives: "3"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo2
+data:
+  player_initial_lives: "5"
+  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment2
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx2
+  template:
+    metadata:
+      labels:
+        app: nginx2
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: config-vol
+      volumes:
+        - name: config-vol
+          configMap:
+            name: game-demo2
+            items:
+            - key: player_initial_lives
+              path: index.html
+              
+              
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment1
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx1
+  template:
+    metadata:
+      labels:
+        app: nginx1
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: config-vol
+      volumes:
+        - name: config-vol
+          configMap:
+            name: game-demo1
+            items:
+            - key: player_initial_lives
+              path: index.html
+              
+              
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service1
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: nginx1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service2
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: nginx2
+---
+
+
+apiVersion: v1
+kind:       ConfigMap
+metadata:
+  name: 'nginx-test-1'
+data:
+  test-value: "value1"
+---
+apiVersion: v1
+kind:       ConfigMap
+metadata:
+  name: 'nginx-test-2'
+data:
+  test-value: 'value2'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 'nginx-test-1'
+spec:
+  selector:
+    matchLabels:
+       app: 'nginx-test-1'
+  template:
+   metadata:
+    labels:
+       app: 'nginx-test-1'
+   spec:
+     containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+     volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-test-1
+          items:
+            - key: "test-value"
+              path: "index.html"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 'nginx-test-2'
+spec:
+  selector:
+    matchLabels:
+       app: 'nginx-test-2'
+  template:
+   metadata:
+    labels:
+       app: 'nginx-test-2'
+   spec:
+     containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+     volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-test-2
+          items:
+            - key: "test-value"
+              path: "index.html"
+---
+*********************************************
+apiVersion: v1
+kind:       Service
+metadata:
+  name: 'nginx-test-1'
+spec:
+  selector:
+    app: 'nginx-test-1'
+  ports:
+    - name:     "http"
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind:       Service
+metadata:
+  name: 'nginx-test-2'
+spec:
+  selector:
+    app: 'nginx-test-2'
+  ports:
+    - name:     "http"
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: 'nginx-test-1'
+  annotations:
+   nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: 'blablabla.com'
+      http:
+       paths:
+         - pathType: Prefix
+           path: "/"
+           backend:
+             service:
+               name: "nginx-test-1"
+               port:
+                  number: 80
+  ingressClassName: nginx
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: 'nginx-test-2'
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: 'blablabla.com'
+      http:
+       paths:
+         - pathType: Prefix
+           path: "/test2"
+           backend:
+             service:
+               name: "nginx-test-2"
+               port:
+                 number: 80
+    - host: 'blablabla2.com'
+      http:
+       paths:
+         - pathType: Prefix
+           path: "/"
+           backend:
+             service:
+               name: "nginx-test-2"
+               port:
+                  number: 80
+  ingressClassName: nginx
+---
+
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+
+--- volume emptydir
+  volumes:
+  - name: my-ed-volume
+    emptyDir: {}
+      # medium: Memory  # <- RAM DISK
+      # sizeLimit: "6Gi"
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: busy1
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    volumeMounts:
+    - mountPath: /tmp/volume
+      name: busyvolume
+  - name: busy2
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    volumeMounts:
+    - mountPath: /tmp/volume
+      name: busyvolume
+  volumes:
+  - name: busyvolume
+    emptyDir: {}
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: busy1
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    volumeMounts:
+    - mountPath: /tmp/volume
+      name: busyvolume
+  - name: busy2
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    volumeMounts:
+    - mountPath: /tmp/volume
+      name: busyvolume
+    securityContext:
+      runAsUser: 2000
+  volumes:
+  - name: busyvolume
+    emptyDir: {}
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+--- RBAC
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: default
+rules:
+ - apiGroups: [""]
+   resources: ["pods"]
+   verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: secret-reader
+rules:
+ - apiGroups: [""]
+   resources: ["secrets"]
+   verbs: ["get", "watch", "list"]
+---
+kubectl api-resources
+https://docs.openshift.com/container-platform/4.8/operators/understanding/crds/crd-extending-api-with-crds.html
+---
+
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: default
+rules:
+ - apiGroups: [""]
+   resources: ["pods"]
+   verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: secret-reader
+rules:
+ - apiGroups: [""]
+   resources: ["secrets"]
+   verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-service-acc
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: my-service-acc
+    namespace: default
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: "rbac.authorization.k8s.io"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secrets
+subjects:
+- kind: ServiceAccount
+  name: my-service-acc
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+
+kubectl auth can-i <verb> <resource> --as=system:serviceaccount:<namespace>:<serviceaccountname> [-n <namespace>]
+
+===
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-secrets-global
+subjects:
+- kind: ServiceAccount
+  name: my-service-acc
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+rbac.example.com/aggregate-to-monitoring: "true"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monitoring
+rules: []
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels: 
+      rbac.example.com/aggregate-to-monitoring: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pods-monitoring
+  labels:
+    rbac.example.com/aggregate-to-monitoring: "true"
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: secret-monitoring
+  labels:
+    rbac.example.com/aggregate-to-monitoring: "true"
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+
+registry.gitlab.onlineterroir.com/omega/public-reg/alpine:latest
+---
+automountServiceAccountToken: true
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine
+spec:
+  containers:
+  - name: alpine
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/alpine:latest
+    command:
+    - sleep
+    - "6000"
+  serviceAccountName: my-service-acc
+---
+apk add curl
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl -H "Authorization: Bearer $TOKEN" https://kubernetes/api --insecure
+
