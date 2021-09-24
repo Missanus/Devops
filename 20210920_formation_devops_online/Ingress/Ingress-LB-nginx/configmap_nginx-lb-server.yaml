@@ -1,0 +1,25 @@
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "nginx-config-lb"
+data:
+  special.type: charm
+  fileprop.properties: |
+    name=nassim
+    salary=oui
+  filesh.sh: |
+    echo  "sleep 1; echo hello from davison"
+    sleep 2; echo "hello from second ligne"
+  index.html: |
+   "value 2 file lb load balancing"
+   "add enw colone"
+   "hello from the second container"
+   "latest ligne"
+  nginx.conf: |
+
+
+    upstream webapp {
+      server 127.0.0.1:5000
+    }

@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 'nginx-lb-server'
+spec:
+  selector:
+    matchLabels:
+       app: 'nginx-lb'
+  template:
+   metadata:
+    labels:
+       app: 'nginx-lb'
+       zone: 'fr'
+   spec:
+     containers:
+      - name: nginx
+        image: nginx
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+     volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-config-lb
+---
