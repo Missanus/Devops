@@ -12,6 +12,7 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
+#  clusterIP: None
   selector:
     app: nginx1
 
@@ -28,6 +29,7 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
+#  clusterIP: None
   selector:
     app: nginx2
 ---

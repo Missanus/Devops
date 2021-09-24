@@ -18,7 +18,7 @@ spec:
   - host: game2.foo.org
     http:
       paths:
-      - path: "/" #game2
+      - path: "/" #game2"
         pathType: Prefix
         backend:
           service:
