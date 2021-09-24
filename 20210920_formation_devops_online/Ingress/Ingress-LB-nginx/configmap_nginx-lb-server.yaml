@@ -6,20 +6,86 @@ metadata:
   name: "nginx-config-lb"
 data:
   special.type: charm
-  fileprop.properties: |
-    name=nassim
-    salary=oui
-  filesh.sh: |
-    echo  "sleep 1; echo hello from davison"
-    sleep 2; echo "hello from second ligne"
   index.html: |
-   "value 2 file lb load balancing"
+   "value 2 file lb load balancing container port 80"
    "add enw colone"
    "hello from the second container"
    "latest ligne"
-  nginx.conf: |
+  indexhtml.5000: |
+   "hello from the first conainre port 5000"
+   "latest ligne port 5000"
+  indexhtml.5001: |
+   "hello from the first conainre port 5000"
+   "latest ligne port 5000"
+  nginx_conf: |-
+    user  nginx;
+    worker_processes  1;
 
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
 
-    upstream webapp {
-      server 127.0.0.1:5000
+    events {
+        worker_connections  1024;
     }
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        sendfile        on;
+        keepalive_timeout  65;
+
+        upstream webapp {
+            server 127.0.0.1:5000;
+        }
+
+        server {
+            listen 80;
+
+            location / {
+                proxy_pass         http://webapp;
+                proxy_redirect     off;
+            }
+        }
+    }
+  nginx_conf_5000: |
+    server {
+    listen       5000;
+    server_name  localhost; # le nom de mon service  monsservice:80 
+
+    #access_log  /var/log/nginx/host.access.log  main;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+  nginx_conf_5001: |
+    server {
+    listen       5001;
+    server_name  localhost; # le nom de mon service  mons service:5001 
+
+    #access_log  /var/log/nginx/host.access.log  main;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+   
