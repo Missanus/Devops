@@ -14,7 +14,7 @@ spec:
        zone: 'fr'
    spec:
      containers:
-      - name: nginx
+      - name: nginx-5000
         image: nginx
         volumeMounts:
         - name: config-volume
