@@ -37,7 +37,7 @@ spec:
           - key: "index.html"
             path: "index.html"
       
-      - name: config-volume-500
+      - name: config-volume-5000
         configMap:
           name: nginx-config-lb
           items:
