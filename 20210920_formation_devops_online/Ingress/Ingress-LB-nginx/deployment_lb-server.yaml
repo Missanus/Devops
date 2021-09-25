@@ -23,7 +23,7 @@ spec:
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
         command: ["/bin/bash"]
-        arg: ["-c", "service nginx reload"]
+        args: ["-c", "service nginx reload"]
 
       - name: nginx
         image: nginx
@@ -31,8 +31,8 @@ spec:
         - name: config-volume
           mountPath: /usr/share/nginx/html
         command: ["/bin/bash"]
-        arg: ["-c", "service nginx reload"]
-        
+        args: ["-c", "service nginx reload"]
+
       volumes:
       - name: config-volume
         configMap:
