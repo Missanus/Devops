@@ -14,6 +14,14 @@ spec:
         zone: 'fr'
     spec:
       containers:
+      - name: nginx
+        image: nginx
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+        command: ["/bin/bash"]
+        args: ["-c",  "service nginx start;"] # "service nginx reload;"]
+
       - name: nginx-5000
         image: nginx
         ports:
@@ -24,15 +32,6 @@ spec:
           subPath: nginx.conf
         command: ["/bin/bash"]
         args: ["-c",  "service nginx start;"] #, "service nginx reload;"]
-
-      - name: nginx
-        image: nginx
-        volumeMounts:
-        - name: config-volume
-          mountPath: /usr/share/nginx/html
-        command: ["/bin/bash"]
-        args: ["-c",  "service nginx start;"] # "service nginx reload;"]
-       
 
       volumes:
       - name: config-volume
