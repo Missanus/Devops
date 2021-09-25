@@ -14,21 +14,21 @@ spec:
         zone: 'fr'
     spec:
       containers:
-      - name: nginx
+      - name: nginx-5000
         image: nginx
         ports:
         - containerPort: 80
-        volumeMounts:
-        - name: config-volume
-          mountPath: /usr/share/nginx/html
-      
-      - name: nginx-5000
-        image: nginx
         volumeMounts:
         - name: config-volume-5000
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
       
+      - name: nginx
+        image: nginx
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+          
       volumes:
       - name: config-volume
         configMap:
