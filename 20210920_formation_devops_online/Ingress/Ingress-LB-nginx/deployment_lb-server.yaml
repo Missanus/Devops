@@ -60,10 +60,4 @@ spec:
             path: "nginx.conf"
 
 
-      - name: config-volume
-        configMap:
-          name: nginx-config-lb
-          items:
-          - key: "index.html"
-            path: "index.html"
 ---
