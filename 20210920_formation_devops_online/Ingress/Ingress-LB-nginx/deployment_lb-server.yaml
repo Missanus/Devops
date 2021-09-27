@@ -24,7 +24,8 @@ spec:
         volumeMounts:
         - name: config-volume-5000
           mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
+          readOnly: true
+          #subPath: nginx.conf
         #command: ["/bin/bash"]
         #args: ["-c", "echo", "SUCCESS", "service nginx stop;",  "service nginx reload;", "service nginx start;"]  
 
