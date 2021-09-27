@@ -21,9 +21,6 @@ spec:
         - mountPath: /etc/nginx/conf.d/
           readOnly: true
           name: nginx-config-5000
-        - name: nginx-config-5000
-          mountPath: /usr/share/nginx/html
-          subPath: index.html
       
       - name: nginx
         image:  dockernassimchet/nginx
@@ -45,7 +42,7 @@ spec:
           - key: "nginx_conf"
             path: "nginx.conf"
           - key: "index.html"
-            path: "index.html"
+            path: "/usr/share/nginx/html/index.html"
       
       - name: nginx-config-5000
         configMap:
@@ -54,7 +51,7 @@ spec:
           - key: "nginx_conf"
             path: "nginx.conf"
           - key: "index.html"
-            path: "index.html"
+            path: "/usr/share/nginx/html/index.html"
 
 
 ---
