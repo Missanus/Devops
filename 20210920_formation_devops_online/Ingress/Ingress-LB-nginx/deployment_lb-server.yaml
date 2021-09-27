@@ -23,9 +23,10 @@ spec:
         ports:
         - containerPort: 80
         volumeMounts:
-        - name: config-volume-5000
+        #- name: config-volume-5000
           mountPath: /etc/nginx/ #custom 
           readOnly: true
+          name: nginx-config-lb-server
           #readOnly: true
           #subPath: nginx.conf
         #command: ["/bin/bash"]
@@ -43,17 +44,26 @@ spec:
      
 
       volumes:
+      
+      - name: config-volume
+        configMap:
+          name: nginx-config-lb-server
+          items:
+          - key: "nginx_conf"
+            path: "nginx.conf"
+      
+      - name: config-volume-5000
+        configMap:
+          name: nginx-config-5000
+          items:
+          - key: "nginx_conf_5000"
+            path: "nginx.conf"
+
+
       - name: config-volume
         configMap:
           name: nginx-config-lb
           items:
           - key: "index.html"
             path: "index.html"
-      
-      - name: config-volume-5000
-        configMap:
-          name: nginx-config-lb
-          items:
-          - key: "nginx_conf_5000"
-            path: "nginx.conf"
 ---
