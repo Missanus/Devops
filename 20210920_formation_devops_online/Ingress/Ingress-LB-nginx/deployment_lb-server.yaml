@@ -17,28 +17,21 @@ spec:
       - name: nginx
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
-      
-
         #command: ["/bin/chmod -R 777 /etc/nginx/"]
         ports:
         - containerPort: 80
         volumeMounts:
         #- name: config-volume-5000
-        - mountPath: /etc/nginx/ #custom 
+        - mountPath: /etc/nginx/
           readOnly: true
           name: nginx-config-lb-server
          
-        #command: ["/bin/bash"]
-        #args: ["-c", "echo", "SUCCESS"] #"service nginx stop;",  "service nginx reload;", "service nginx start;"]  
       
       - name: nginx-5000
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
         volumeMounts:
-        #- mountPath: /usr/share/nginx/html
-        #  name: config-volume-5000
-          
-        - mountPath: /etc/nginx/ #custom 
+        - mountPath: /etc/nginx/
           readOnly: true
           name: config-volume-5000
      
