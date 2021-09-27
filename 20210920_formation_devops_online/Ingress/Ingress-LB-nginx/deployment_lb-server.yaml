@@ -25,7 +25,7 @@ spec:
           mountPath: /usr/share/nginx/html/index.html
           subPath: index.html  
       
-      - name: nginx
+      - name: nginx-proxy-reverse
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
         ports:
