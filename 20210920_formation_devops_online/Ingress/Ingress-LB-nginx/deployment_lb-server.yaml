@@ -25,6 +25,17 @@ spec:
           mountPath: /usr/share/nginx/html/index.html
           subPath: index.html  
       
+      - name: nginx-5001
+        image:  dockernassimchet/nginx
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d/
+          readOnly: true
+          name: nginx-config-5001
+        - name: nginx-config-5001
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html  
+
       - name: nginx-proxy-reverse
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
@@ -52,6 +63,15 @@ spec:
       - name: nginx-config-5000
         configMap:
           name: nginx-config-5000
+          items:
+          - key: "nginx_conf"
+            path: "nginx.conf"
+          - key: "index.html"
+            path: "index.html"
+
+      - name: nginx-config-5001
+        configMap:
+          name: nginx-config-5001
           items:
           - key: "nginx_conf"
             path: "nginx.conf"
