@@ -24,7 +24,7 @@ spec:
         - containerPort: 80
         volumeMounts:
         #- name: config-volume-5000
-          mountPath: /etc/nginx/ #custom 
+        - mountPath: /etc/nginx/ #custom 
           readOnly: true
           name: nginx-config-lb-server
           #readOnly: true
