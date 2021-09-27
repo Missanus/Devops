@@ -44,6 +44,8 @@ spec:
           items:
           - key: "nginx_conf"
             path: "nginx.conf"
+          - key: "index.html"
+            path: "index.html"
       
       - name: nginx-config-5000
         configMap:
@@ -51,6 +53,8 @@ spec:
           items:
           - key: "nginx_conf"
             path: "nginx.conf"
+          - key: "index.html"
+            path: "index.html"
 
 
 ---
