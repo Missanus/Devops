@@ -8,7 +8,7 @@ data:
   special.type: charm
   nginx_conf: |-
     server {
-      listen       5000;
+      listen       80;
       server_name  localhost; # le nom de mon service  monsservice:80 
 
       #access_log  /var/log/nginx/host.access.log  main;

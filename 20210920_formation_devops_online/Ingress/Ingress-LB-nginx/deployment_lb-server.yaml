@@ -18,7 +18,6 @@ spec:
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 5000
         volumeMounts:
         - mountPath: /etc/nginx/
           readOnly: true
