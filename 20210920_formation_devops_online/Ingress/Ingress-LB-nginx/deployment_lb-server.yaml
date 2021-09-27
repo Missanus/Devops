@@ -15,8 +15,12 @@ spec:
     spec:
       containers:
       - name: nginx
+<<<<<<< HEAD
         image: nginx
         imagePullPolicy: IfNotPresent
+=======
+        image: docker.io/library/nginx:latest
+>>>>>>> b135a4cf1f5307bd40b484c9b679a475b5c5563d
         ports:
         - containerPort: 80
         volumeMounts:
