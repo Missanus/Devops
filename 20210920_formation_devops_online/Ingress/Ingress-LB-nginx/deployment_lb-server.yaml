@@ -26,8 +26,6 @@ spec:
         - name: config-volume-5000
           mountPath: /etc/nginx/ #custom 
           readOnly: true
-          subPath: nginx.conf
-
           #readOnly: true
           #subPath: nginx.conf
         #command: ["/bin/bash"]
