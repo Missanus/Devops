@@ -21,6 +21,9 @@ spec:
         - mountPath: /etc/nginx/conf.d/
           readOnly: true
           name: nginx-config-5000
+        - name: nginx-config-5000
+          mountPath: /usr/share/nginx/html
+          subPath: index.html
       
       - name: nginx
         image:  dockernassimchet/nginx
