@@ -23,7 +23,7 @@ spec:
         - containerPort: 80
         volumeMounts:
         - name: config-volume-5000
-          mountPath: /etc/nginx/nginx.conf
+          mountPath: /etc/nginx/
           readOnly: true
           #subPath: nginx.conf
         #command: ["/bin/bash"]
