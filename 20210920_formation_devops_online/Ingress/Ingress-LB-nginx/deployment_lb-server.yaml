@@ -16,6 +16,7 @@ spec:
       containers:
       - name: nginx
         image: nginx
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
         volumeMounts:
@@ -23,7 +24,7 @@ spec:
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
         command: ["/bin/bash"]
-        args: ["-c",  "service nginx start;"] #, "service nginx reload;"]  
+        args: ["-c", "echo", "SUCCESS", "service nginx start;"] #, "service nginx reload;"]  
 
       - name: nginx-5000
         image: nginx
@@ -31,7 +32,7 @@ spec:
         - name: config-volume
           mountPath: /usr/share/nginx/html
         command: ["/bin/bash"]
-        args: ["-c",  "service nginx start;"] # "service nginx reload;"]
+        args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
 
      
 
