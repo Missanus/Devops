@@ -14,26 +14,23 @@ spec:
         zone: 'fr'
     spec:
       containers:
-      - name: nginx
-        image:  dockernassimchet/nginx
-        imagePullPolicy: IfNotPresent
-        #command: ["/bin/chmod -R 777 /etc/nginx/"]
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        #- name: config-volume-5000
-        - mountPath: /etc/nginx/
-          readOnly: true
-          name: nginx-config-lb-server
-         
-      
       - name: nginx-5000
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
-        #volumeMounts:
-        #- mountPath: /etc/nginx/
-        #  readOnly: true
-        #  name: nginx-config-5000
+        volumeMounts:
+        - mountPath: /etc/nginx/
+          readOnly: true
+          name: nginx-config-5000
+      
+      - name: nginx
+        image:  dockernassimchet/nginx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx/
+          readOnly: true
+          name: nginx-config-lb-server
      
 
       volumes:
