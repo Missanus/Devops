@@ -35,10 +35,6 @@ spec:
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
         volumeMounts:
-        - mountPath: /etc/nginx/ #custom 
-          readOnly: true
-          name: nginx-config-lb-server
-
         #- mountPath: /usr/share/nginx/html
         #  name: config-volume-5000
           
