@@ -12,7 +12,7 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
-  clusterIP: None
+  #clusterIP: None
   selector:
     app: nginx-lb
     zone: 'fr'

@@ -36,7 +36,6 @@ spec:
         #args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
 
      
-
       volumes:
       - name: config-volume
         configMap:
