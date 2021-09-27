@@ -6,9 +6,9 @@ metadata:
   name: "nginx-config-lb-server"
 data:
   special.type: charm
-  index.html: |
-   "value 2 file lb load balancing container port 5000"
-   "add enw colone"
+  index.html: |-
+   "value 2 file lb load balancing container port 80"
+   "add enw colone issy"
    "hello from the second container"
    "latest ligne"
   nginx_conf: |-
