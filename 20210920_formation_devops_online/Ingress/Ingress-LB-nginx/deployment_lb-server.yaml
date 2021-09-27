@@ -20,19 +20,19 @@ spec:
         ports:
         - containerPort: 80
         volumeMounts:
-        - name: config-volume-5000
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
-        command: ["/bin/bash"]
-        args: ["-c", "echo", "SUCCESS", "service nginx start;"] #, "service nginx reload;"]  
+        #- name: config-volume-5000
+        #  mountPath: /etc/nginx/nginx.conf
+        #  subPath: nginx.conf
+        #command: ["/bin/bash"]
+        #args: ["-c", "echo", "SUCCESS", "service nginx start;"] #, "service nginx reload;"]  
 
       - name: nginx-5000
         image: docker.io/library/nginx
         volumeMounts:
         - name: config-volume
           mountPath: /usr/share/nginx/html
-        command: ["/bin/bash"]
-        args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
+        #command: ["/bin/bash"]
+        #args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
 
      
 
