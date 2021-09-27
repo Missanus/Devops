@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: docker.io/library/nginx
+        image: docker.io/library/dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -27,7 +27,7 @@ spec:
         #args: ["-c", "echo", "SUCCESS", "service nginx start;"] #, "service nginx reload;"]  
 
       - name: nginx-5000
-        image: docker.io/library/nginx
+        image: docker.io/library/dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: config-volume
@@ -36,6 +36,7 @@ spec:
         #args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
 
      
+
       volumes:
       - name: config-volume
         configMap:
