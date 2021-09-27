@@ -17,13 +17,19 @@ spec:
       - name: nginx
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
-        command: ["/bin/chmod","-R","777", "/etc/nginx/"]
+        args: [
+        "-n", "/etc/nginx/custom/nginx.conf",
+        "-s", "SERVICE_NAME",
+        "--rollout_strategy", "managed",
+      ]
+
         #command: ["/bin/chmod -R 777 /etc/nginx/"]
         ports:
         - containerPort: 80
         volumeMounts:
         - name: config-volume-5000
-          mountPath: /etc/nginx/
+          mountPath: /etc/nginx/custom 
+          readOnly: true
           #readOnly: true
           #subPath: nginx.conf
         #command: ["/bin/bash"]
