@@ -7,14 +7,14 @@ metadata:
 data:
   special.type: charm
   index.html: |-
-   "value 5000 file lb load balancing container port  5000"
+   "value 5001 file lb load balancing container port  5001"
    "add enw colone"
    "hello from the second container"
    "latest ligne"
   nginx_conf: |-
     server {
         listen       5001;
-        server_name  localhost; # le nom de mon service  monsservice:80 
+        server_name  localhost; 
 
         #access_log  /var/log/nginx/host.access.log  main;
 
