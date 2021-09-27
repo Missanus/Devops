@@ -24,17 +24,17 @@ spec:
         volumeMounts:
         - name: config-volume-5000
           mountPath: /etc/nginx/
-          readOnly: true
+          #readOnly: true
           #subPath: nginx.conf
         #command: ["/bin/bash"]
         #args: ["-c", "echo", "SUCCESS", "service nginx stop;",  "service nginx reload;", "service nginx start;"]  
-
-      - name: nginx-5000
-        image:  dockernassimchet/nginx
-        imagePullPolicy: IfNotPresent
-        volumeMounts:
-        - name: config-volume
-          mountPath: /usr/share/nginx/html
+      
+      #- name: nginx-5000
+      #  image:  dockernassimchet/nginx
+      #  imagePullPolicy: IfNotPresent
+      #  volumeMounts:
+      #  - name: config-volume
+      #    mountPath: /usr/share/nginx/html
         #command: ["/bin/bash"]
         #args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
 
