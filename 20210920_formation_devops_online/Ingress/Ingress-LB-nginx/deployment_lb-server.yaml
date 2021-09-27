@@ -28,6 +28,7 @@ spec:
 
       - name: nginx-5000
         image: docker.io/library/nginx
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: config-volume
           mountPath: /usr/share/nginx/html
