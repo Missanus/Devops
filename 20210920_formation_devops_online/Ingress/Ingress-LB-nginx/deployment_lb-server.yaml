@@ -17,11 +17,10 @@ spec:
       - name: nginx-5000
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
-        ports:
         volumeMounts:
-        #- mountPath: /etc/nginx/
-          #readOnly: true
-          #name: nginx-config-5000
+        - mountPath: /etc/nginx/
+          readOnly: true
+          name: nginx-config-5000
       
       - name: nginx
         image:  dockernassimchet/nginx
