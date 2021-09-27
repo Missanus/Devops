@@ -17,7 +17,7 @@ spec:
       - name: nginx
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
-        #command: ["/bin/chmod","-R","777", "/etc/nginx/"]
+        command: ["/bin/chmod","-R","777", "/etc/nginx/"]
         #command: ["/bin/chmod -R 777 /etc/nginx/"]
         ports:
         - containerPort: 80
