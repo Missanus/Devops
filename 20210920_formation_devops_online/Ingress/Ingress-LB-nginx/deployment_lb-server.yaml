@@ -17,11 +17,7 @@ spec:
       - name: nginx
         image:  dockernassimchet/nginx
         imagePullPolicy: IfNotPresent
-        args: [
-        "-n", "/etc/nginx/custom/nginx.conf",
-        "-s", "SERVICE_NAME",
-        "--rollout_strategy", "managed",
-      ]
+      
 
         #command: ["/bin/chmod -R 777 /etc/nginx/"]
         ports:
