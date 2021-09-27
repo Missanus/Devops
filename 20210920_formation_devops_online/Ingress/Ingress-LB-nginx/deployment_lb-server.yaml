@@ -25,6 +25,7 @@ spec:
         volumeMounts:
         - name: config-volume-5000
           mountPath: /etc/nginx/ #custom 
+          subPath: nginx.conf
           readOnly: true
           #readOnly: true
           #subPath: nginx.conf
