@@ -6,7 +6,7 @@ metadata:
   name: "nginx-config-5000"
 data:
   special.type: charm
-  nginx_conf_5000: |-
+  nginx_conf: |-
     server {
       listen       5000;
       server_name  localhost; # le nom de mon service  monsservice:80 
