@@ -33,7 +33,7 @@ spec:
         volumeMounts:
         - mountPath: /etc/nginx/
           readOnly: true
-          name: config-volume-5000
+          name: nginx-config-5000
      
 
       volumes:
@@ -45,7 +45,7 @@ spec:
           - key: "nginx_conf"
             path: "nginx.conf"
       
-      - name: config-volume-5000
+      - name: nginx-config-5000
         configMap:
           name: nginx-config-5000
           items:
