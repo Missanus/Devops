@@ -45,7 +45,7 @@ spec:
 
       volumes:
       
-      - name: config-volume
+      - name: nginx-config-lb-server
         configMap:
           name: nginx-config-lb-server
           items:
