@@ -26,26 +26,24 @@ spec:
         #- name: config-volume-5000
         - mountPath: /etc/nginx/ #custom 
           readOnly: true
-          name: nginx-config-lb-server
-          #readOnly: true
-          #subPath: nginx.conf
+          name: nginx-config-lb-server-a
+         
         #command: ["/bin/bash"]
-        #args: ["-c", "echo", "SUCCESS", "service nginx stop;",  "service nginx reload;", "service nginx start;"]  
+        #args: ["-c", "echo", "SUCCESS"] #"service nginx stop;",  "service nginx reload;", "service nginx start;"]  
       
-      #- name: nginx-5000
-      #  image:  dockernassimchet/nginx
-      #  imagePullPolicy: IfNotPresent
-      #  volumeMounts:
-      #  - name: config-volume
-      #    mountPath: /usr/share/nginx/html
-        #command: ["/bin/bash"]
-        #args: ["-c", "echo", "SUCCESS", "service nginx start;"] # "service nginx reload;"]
+      - name: nginx-5000
+        image:  dockernassimchet/nginx
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/nginx/html
+
 
      
 
       volumes:
       
-      - name: nginx-config-lb-server
+      - name: nginx-config-lb-server-a
         configMap:
           name: nginx-config-lb-server
           items:
