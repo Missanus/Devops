@@ -11,12 +11,9 @@ spec:
       - path: "/"
         pathType: Prefix
         backend:
-          serviceName: lb-server-service
-          servicePort: 80
-        #backend:  #defaultBackend:
-        #  service:
-        #    name: lb-server-service
-        #    port:
-        #      number: 80
+          service:
+            name: lb-server-service
+            port:
+              number: 80
   ingressClassName: nginx
 ---
