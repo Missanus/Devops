@@ -1,5 +1,5 @@
 ---  
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-nginx-lb-proxy
@@ -10,13 +10,13 @@ spec:
       paths:
       - path: "/"
         pathType: Prefix
-        #backend:
-        #  serviceName: lb-server-service
-        #  servicePort: 80
-        defaultBackend:  #defaultBackend:
-          service:
-            name: lb-server-service
-            port:
-              number: 80
+        backend:
+          serviceName: lb-server-service
+          servicePort: 80
+        #backend:  #defaultBackend:
+        #  service:
+        #    name: lb-server-service
+        #    port:
+        #      number: 80
   ingressClassName: nginx
 ---
