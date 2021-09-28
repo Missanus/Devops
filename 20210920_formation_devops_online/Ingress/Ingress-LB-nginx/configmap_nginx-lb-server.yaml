@@ -34,12 +34,16 @@ data:
             server 127.0.0.1:5000 weight=2;
             server 127.0.0.1:5001;
         }
-
+ 
+        # This server accepts all traffic to port 80 and passes it to the upstream. 
+        # Notice that the upstream name and the proxy_pass need to match.
+        
         server {
             listen 80;
+            server_name         www.big.server.com big.server.com;
 
             location / {
-                proxy_pass         http://nginx-en-amont-5000;
+                proxy_pass         http://nginx-en-amont-5000;  #choice name 
                 proxy_redirect     off;
             }
         }
