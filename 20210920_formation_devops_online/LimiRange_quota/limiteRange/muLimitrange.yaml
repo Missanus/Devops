@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-lr
+  namespace: dev-lr
+spec:
+  limits:
+  - type: Container # mon conteneur ne vas pas dépasser ces limites en ram et cpu
+    max:            #Acceptable max
+      memory: 512M  #RAM
+      cpu: 500m     # mili coprs cpu
+    min:            #Acceptable min
+      memory: 50M   # mili coprs cpu
+      cpu: 50m
+--- 
