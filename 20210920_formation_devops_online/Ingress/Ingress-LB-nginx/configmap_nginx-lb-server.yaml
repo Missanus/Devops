@@ -31,7 +31,7 @@ data:
 
         upstream nginx-en-amont-5000 {                             #https://upcloud.com/community/tutorials/configure-load-balancing-nginx/
             least_conn;                       
-            server 127.0.0.1:5000 weight 2;
+            server 127.0.0.1:5000 weight=2;
             server 127.0.0.1:5001;
         }
 
