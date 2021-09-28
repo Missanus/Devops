@@ -5,6 +5,14 @@ metadata:
   namespace: dev-lr
 
 spec:
+  selector:
+    matchLabels:
+       app: 'busy-box' 
+  template:
+    metadata:
+      labels:
+        app: 'busy-box'
+  
   containers:
   - name: busybox-cnt01
     image: busybox
