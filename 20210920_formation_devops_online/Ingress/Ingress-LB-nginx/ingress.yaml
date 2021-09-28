@@ -11,8 +11,8 @@ spec:
       - path: "/"
         pathType: Prefix
         backend:
-        serviceName: lb-server-service
-        servicePort: 80
+          serviceName: lb-server-service
+          servicePort: 80
         #backend:  #defaultBackend:
         #  service:
         #    name: lb-server-service
