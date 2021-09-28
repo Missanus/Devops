@@ -2,17 +2,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-nginx-lb
+  name: ingress-nginx-lb-proxy
 spec:
   rules:
-  - host: game3.foo.org
+  - host: big.server.com
     http:
       paths:
       - path: "/"
         pathType: Prefix
         backend:
           service:
-            name: service-lb-server
+            name: lb-server-service
             port:
               number: 80
   ingressClassName: nginx
