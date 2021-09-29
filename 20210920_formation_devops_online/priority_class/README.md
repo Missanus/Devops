@@ -16,10 +16,11 @@ description: "This priority class should be used for Normal priority service pod
 ### Utilisation de Quota + priorityclass:
 Un niveau de quota bestEffot + priorityClass faible: tué et re-créé    
 Un niveau de quota bestEffot + priorityClass hight: va voir dans les autres classes les pods faibles pour les tuer puis les re-créer à nouveau  
-PriorityClass et les quotas fonctionnent ensemble 
+PriorityClass et les quotas fonctionnent ensemble.
 Si nous spécifions une priorityClass dans un deploiment, notre pod sera créé dans le quotas qui correspondent à la classe prioritaire.  
 
-
+*Note:*
+We cannot deploy resources in classes attached to Qos when the priority class Qos + does not meet the limit requirement requested by the deployment / pod
 
 ### Command:
 kubectl get PriorityClass
@@ -27,3 +28,4 @@ NAME                      VALUE        GLOBAL-DEFAULT   AGE
 low                       1000         false            4m4s
 normal                    10000        false            4m4s
 premium                   1000000      false            4m4s
+
