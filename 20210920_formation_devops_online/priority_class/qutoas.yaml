@@ -20,7 +20,7 @@ items:
       matchExpressions:
       - operator : In
         scopeName: PriorityClass
-        values: ["high"]
+        values: ["premium"]
 - apiVersion: v1
   kind: ResourceQuota
   metadata:
