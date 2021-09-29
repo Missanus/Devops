@@ -16,5 +16,5 @@ spec:
     requests.memory: 1G
     limits.cpu: 2
     limits.memory: 2G
-    pods: 3                 # maximum 3 pods par namespace
+    pods: 3
 ---
