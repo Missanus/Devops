@@ -1,4 +1,4 @@
-
+---
 apiVersion: v1
 kind: List
 items:
@@ -21,12 +21,13 @@ items:
       - operator : In
         scopeName: PriorityClass
         values: ["premium"]
+
 - apiVersion: v1
   kind: ResourceQuota
   metadata:
     name: pods-medium
   spec:
-     hard:
+    hard:
       cpu: 200m
       memory: 100M
       pods: "5"
@@ -34,5 +35,5 @@ items:
       matchExpressions:
       - operator : In
         scopeName: PriorityClass
-        values: ["medium"]
+        values: ["normal"]
 ---
