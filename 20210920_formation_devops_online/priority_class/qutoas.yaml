@@ -28,8 +28,8 @@ items:
     name: pods-medium
   spec:
     hard:
-      cpu: 200m
-      memory: 100M
+      cpu: 1    # 1 cpu
+      memory: 700M  
       pods: 5
     scopeSelector:
       matchExpressions:
