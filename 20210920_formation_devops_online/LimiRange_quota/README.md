@@ -90,10 +90,10 @@ spec:
   - NotBestEffort
 
 ### Edit the hard eviction thresholds of worker nodes
-vim /usr/lib/systemd/system/kubelet.service
---evictionhard=
-memory.available<500Mi,nodefs.available<5Gi,imagefs.available<5Gi
---system-reserved=memory=1.5Gi
+vim /usr/lib/systemd/system/kubelet.service  
+--evictionhard=  
+memory.available<500Mi,nodefs.available<5Gi,imagefs.available<5Gi  
+--system-reserved=memory=1.5Gi  
 
 Run the following commands to enable the new thresholds:  
 systemctl daemon-reload  
