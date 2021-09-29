@@ -17,6 +17,8 @@ spec:
         image: k8s.gcr.io/hpa-example
         ports:
         - containerPort: 80
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo hello from cnt01; sleep 10;done"]
         resources:
           limits:
             cpu: 500m

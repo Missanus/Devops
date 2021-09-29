@@ -16,7 +16,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: php-apache
-  minReplicas: 2
+  minReplicas: 2      # je vais avoir 2 replicas min aulieu de 1
   maxReplicas: 15
   metrics:
   - type: Resource
