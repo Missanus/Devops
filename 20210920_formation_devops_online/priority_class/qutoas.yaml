@@ -9,7 +9,7 @@ items:
   spec:
     hard:
       cpu: "1"  #1 cpu
-      memory: 700M  # 500 M
+      memory: 1Gi  # 500 M
       pods: "10"
       configmaps: "10"
       persistentvolumeclaims: "4"
@@ -28,7 +28,7 @@ items:
   spec:
     hard:
       cpu: "4000m"  #500K
-      memory: 2Gi
+      memory: 500M
       pods: "5"
     scopeSelector:
       matchExpressions:
@@ -42,7 +42,7 @@ items:
   spec:
     hard:
       cpu: "1000m"
-      memory: 1Gi
+      memory: 500M
       pods: "3"
     scopeSelector:
       matchExpressions:
