@@ -89,6 +89,16 @@ spec:
   scopes:
   - NotBestEffort
 
+### Edit the hard eviction thresholds of worker nodes
+vim /usr/lib/systemd/system/kubelet.service
+--evictionhard=
+memory.available<500Mi,nodefs.available<5Gi,imagefs.available<5Gi
+--system-reserved=memory=1.5Gi
+
+Run the following commands to enable the new thresholds:  
+systemctl daemon-reload  
+systemctl restart kubelet  
+
 ## Best practices  
 Il faut toujours définir des limits et des requests pour les pods les plus critiques:
 Quand la limite n’est pas définie, Kubernetes considère que toutes les ressources du nœud peuvent être consommées au runtime.
