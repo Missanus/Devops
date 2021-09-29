@@ -5,11 +5,11 @@ items:
 - apiVersion: v1
   kind: ResourceQuota
   metadata:
-    name: pods-high
+    name: pods-premium
   spec:
     hard:
-      cpu: "5000m"  #5000 k
-      memory: 2Gi
+      cpu: "1"  #1 cpu
+      memory: 2Gi  # 500 M
       pods: "10"
       configmaps: "10"
       persistentvolumeclaims: "4"
