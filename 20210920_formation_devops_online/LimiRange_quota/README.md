@@ -1,5 +1,14 @@
 
 
+## LimitRange, QoS et éviction
+On distingue deux types de ressources :
+### Types de ressources
+#### Compressibles :
+Ce sont les ressources qui sont *inépuisables* du moment qu’on a le temps pour attendre qu’ils soient de nouveau disponibles (ex : *CPU, Réseau*). En cas de surcharge, on peut toujours avoir un accès limité à ces ressources (*Throttling*), mais avec un risque de latence et de famine.
+
+#### Non compressibles :
+Ce sont les ressources limitées, si toutes les ressources disponibles sont consommées l’application ne pourra plus en avoir plus (ex : *Mémoire, Disque..*), En cas de surcharge, certains processus peuvent être tués (*kill, OOM*), si le système a besoin de libérer des ressources.
+
 ### policies " sur les limits et requests :
 Pour s’assurer d’une exploitation optimale et contrôlée du nœud, ceci peut se faire à l’aide de RessourceQuota au niveau namespace ainsi qu'avec les LimitRanges au niveau container/pod.
 
@@ -85,18 +94,21 @@ Il faut toujours définir des limits et des requests pour les pods les plus crit
 Quand la limite n’est pas définie, Kubernetes considère que toutes les ressources du nœud peuvent être consommées au runtime.
 
 Gérer la stabilité des déploiements et des nœuds en se basant sur les classes  de QoS:
+
 Éviter la création de pod BestEffort si l’application est sensible aux restarts/kill.
 
 Les pods critiques tels que les bases de données et les services statefull doivent être Guaranteed si on veut minimiser la latence CPU et éviter qu’ils soient tués en cas de surcharge de mémoire.
+
 Burstable c’est pour les applications les plus communes, mais qu’on veut contrôler leur consommation de ressources en mettant des limits  (Un serveur web par exemple).
+
 Un pod avec une request basse aura plus de facilité à être schedulé.
 
 Utiliser les LimitRange, pour être sûr d’avoir toujours des requests et des limits bien définis, on associant des valeurs par défaut et en imposant des bornes.
 
-Protéger le nœud et les processus critiques de Kubernetes, en ajustant le threshold d'éviction.
+Protéger le nœud et les processus critiques de Kubernetes, en ajustant le *threshold d'éviction*.
 
-Imposer la définition de limits (et/ou) requests et séparer les environnements en associant RessourceQuotas par namespace (ex : un quota limité sur le namespace de l’environnement DEV) .
+Imposer la définition de limits (et/ou) requests et séparer les environnements en associant *RessourceQuotas* par *namespace* (ex : un quota limité sur le namespace de l’environnement DEV) .
 
-
+*Monitorer* pour bien estimer la consommation de ressources et définir les RessourceQuota et les LimitRange en fonction de cela pour une meilleure exploitation du nœud.
 
  référence: https://blog.wescale.fr/2018/09/14/k8s-gestion-de-ressources/
