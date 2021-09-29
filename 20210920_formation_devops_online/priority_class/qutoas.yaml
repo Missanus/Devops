@@ -9,7 +9,7 @@ items:
   spec:
     hard:
       cpu: "1"  #1 cpu
-      memory: 2Gi  # 500 M
+      memory: 700M  # 500 M
       pods: "10"
       configmaps: "10"
       persistentvolumeclaims: "4"
