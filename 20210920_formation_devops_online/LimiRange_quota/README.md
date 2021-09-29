@@ -1,11 +1,10 @@
 
 
-policies" sur les limits et requests :
-Pour s’assurer d’une exploitation optimale et contrôlée du nœud, ceci peut se faire à l’aide de RessourceQuota au niveau namespace 
-ainsi qu'avec les LimitRanges au niveau container/pod.
+### policies " sur les limits et requests :
+Pour s’assurer d’une exploitation optimale et contrôlée du nœud, ceci peut se faire à l’aide de RessourceQuota au niveau namespace ainsi qu'avec les LimitRanges au niveau container/pod.
 
 
-Requests :
+### Requests:
 C’est la quantité de ressource (cpu ou mémoire) demandée par un container.
 Les Requests sont évalués au moment du scheduling, par conséquent la somme de toutes les requests de mémoire ne peut 
 pas dépasser la mémoire totale allouable (allocatable) du nœud.
@@ -32,7 +31,7 @@ Ainsi la quantité de ressource demandée sera allouée au container/pod, il s�
  sont classés en: bestEffort, burstable et guaranteed ""(BestEffort < Burstable < Guaranteed)""
 
  Différence:
- _BestEffort_ < __Burstable__ < __Guaranteed__)
+ __BestEffort__ < __Burstable__ < __Guaranteed__)
  Burstable requests<limits
 
  resources:
@@ -50,30 +49,53 @@ limits:
             cpu: "100m"
 
 
-Overcommitment
+### Application de quota:
+Des quotas par namespace sur le total de limits et de requests autorisés. L ’api-server renvoie une erreur "403 Forbidden" si le quota est dépassé.
+
+### Overcommitment:
 Si la somme totale des limits de tous les pods est supérieure à la mémoire allouable du nœud, alors on dit que le nœud est overcommitted.
 L'overcommitment part de l’hypothèse que tous les pods ne vont pas atteindre leurs limites en même temps.
 
 
-Nœud surchargé
+### Nœud surchargé:
 Cela qui peut malheureusement arriver (par exemple quand les limits de mémoire sont trop optimistes ou que tous 
 les pods consomment beaucoup plus que leurs requests en même temps.
 
-Eviction:
+### Eviction:
 En cas de surcharge du nœud Kubernetes peut faire recours à l'éviction qui est un mécanisme de défense ( paramétré au niveau du kubelet ). 
 Il s’agit de "descheduler" certains pods par ordre de priorité selon le niveau de QoS, 
 Il s’agit d’une hard limit au niveau du nœud sur la mémoire restante:
 (--eviction-hard="memory.available<200Mi")
 
 
-Libération de mémoire:
+### Libération de mémoire:
 Dans cet exemple, en cas de surcharge du nœud si la mémoire totale restante est inférieure à 200Mi,
 l’éviction sera enclenchée et les pods qui ont les QoS les plus basses seront évincés en premier pour libérer les ressources aux pods de QoS plus élevés.
 
+### RessourceQuota Scope
+Les RessourceQuota peuvent être aussi spécifiées par scope de pod, on pourrait vouloir par exemple associer un quota qui ne s’applique que sur les pods NotBestEffort ou Terminating etc..
+spec:
+  hard:
+    pods: "3"
+  scopes:
+  - NotBestEffort
 
+## Best practices  
+Il faut toujours définir des limits et des requests pour les pods les plus critiques:
+Quand la limite n’est pas définie, Kubernetes considère que toutes les ressources du nœud peuvent être consommées au runtime.
 
+Gérer la stabilité des déploiements et des nœuds en se basant sur les classes  de QoS:
+Éviter la création de pod BestEffort si l’application est sensible aux restarts/kill.
 
+Les pods critiques tels que les bases de données et les services statefull doivent être Guaranteed si on veut minimiser la latence CPU et éviter qu’ils soient tués en cas de surcharge de mémoire.
+Burstable c’est pour les applications les plus communes, mais qu’on veut contrôler leur consommation de ressources en mettant des limits  (Un serveur web par exemple).
+Un pod avec une request basse aura plus de facilité à être schedulé.
 
+Utiliser les LimitRange, pour être sûr d’avoir toujours des requests et des limits bien définis, on associant des valeurs par défaut et en imposant des bornes.
+
+Protéger le nœud et les processus critiques de Kubernetes, en ajustant le threshold d'éviction.
+
+Imposer la définition de limits (et/ou) requests et séparer les environnements en associant RessourceQuotas par namespace (ex : un quota limité sur le namespace de l’environnement DEV) .
 
 
 
