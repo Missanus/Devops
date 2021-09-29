@@ -21,3 +21,9 @@ Si nous spécifions une priorityClass dans un deploiment, notre pod sera créé 
 
 
 
+### Command:
+kubectl get PriorityClass
+NAME                      VALUE        GLOBAL-DEFAULT   AGE
+low                       1000         false            4m4s
+normal                    10000        false            4m4s
+premium                   1000000      false            4m4s
