@@ -8,8 +8,8 @@ items:
     name: pods-premium
   spec:
     hard:
-      cpu: "1"  #1 cpu
-      memory: 1Gi  # 500 M
+      cpu: 1
+      memory: 500M
       pods: "10"
       configmaps: "10"
       persistentvolumeclaims: "4"
@@ -26,26 +26,13 @@ items:
   metadata:
     name: pods-medium
   spec:
-    hard:
-      cpu: "4000m"  #500K
-      memory: 500M
+     hard:
+      cpu: 200m
+      memory: 100M
       pods: "5"
     scopeSelector:
       matchExpressions:
       - operator : In
         scopeName: PriorityClass
         values: ["medium"]
-- apiVersion: v1
-  kind: ResourceQuota
-  metadata:
-    name: pods-low
-  spec:
-    hard:
-      cpu: "1000m"
-      memory: 500M
-      pods: "3"
-    scopeSelector:
-      matchExpressions:
-      - operator : In
-        scopeName: PriorityClass
-        values: ["low"]
+---
