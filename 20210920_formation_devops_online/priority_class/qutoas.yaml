@@ -10,12 +10,12 @@ items:
     hard:
       cpu: 1
       memory: 500M
-      pods: "10"
-      configmaps: "10"
-      persistentvolumeclaims: "4"
-      secrets: "10"
-      services: "10"
-      services.loadbalancers: "2"
+      pods: 10
+      #configmaps: "10"
+      #persistentvolumeclaims: "4"
+      #secrets: "10"
+      #services: "10"
+      #services.loadbalancers: "2"
     scopeSelector:
       matchExpressions:
       - operator : In
@@ -30,7 +30,7 @@ items:
     hard:
       cpu: 200m
       memory: 100M
-      pods: "5"
+      pods: 5
     scopeSelector:
       matchExpressions:
       - operator : In
