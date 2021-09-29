@@ -8,7 +8,7 @@ items:
     name: pods-high
   spec:
     hard:
-      cpu: "5000"  #5000 k
+      cpu: "5000m"  #5000 k
       memory: 2Gi
       pods: "10"
       configmaps: "10"
