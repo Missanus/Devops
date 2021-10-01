@@ -7,6 +7,7 @@ metadata:
 rules:
  - apiGroups: [""]
    resources: ["pods"]             # on l'applique sur les secrets 
+   resourceNames: ["alpine"]
    verbs: ["get", "watch", "list"]
 
 ---
