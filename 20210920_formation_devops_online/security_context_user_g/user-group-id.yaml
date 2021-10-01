@@ -15,6 +15,7 @@ spec:
     - mountPath: /tmp/volume
       name: busyvolume
     securityContext:
+      runAsGroup: 3000
       runAsUser: 2500
   - name: busynode2
     image: gcr.io/google-samples/node-hello:1.0
@@ -26,11 +27,12 @@ spec:
     - mountPath: /tmp/volume
       name: busyvolume
     securityContext:
+      runAsGroup: 3000
       runAsUser: 2000
   volumes:
   - name: busyvolume
     emptyDir: {}
 
-  securityContext:
+  #securityContext:
     #runAsUser: 1000
-    runAsGroup: 3000
+  #  runAsGroup: 3000
