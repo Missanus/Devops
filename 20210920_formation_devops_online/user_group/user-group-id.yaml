@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: busy1
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    volumeMounts:
+    - mountPath: /tmp/volume
+      name: busyvolume
+  
+  - name: busy2
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    volumeMounts:
+    - mountPath: /tmp/volume
+      name: busyvolume
+    securityContext:
+      runAsUser: 2000
+  volumes:
+  - name: busyvolume
+    emptyDir: {}
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
