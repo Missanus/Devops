@@ -32,5 +32,5 @@ spec:
     emptyDir: {}
 
   securityContext:
-    runAsUser: 1000
+    #runAsUser: 1000
     runAsGroup: 3000
