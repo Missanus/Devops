@@ -57,6 +57,6 @@ CapEff:	00000000a80425fb
 
 
 
-source
-https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-https://snyk.io/blog/10-kubernetes-security-context-settings-you-should-understand/
+source  
+https://kubernetes.io/docs/tasks/configure-pod-container/security-context/  
+https://snyk.io/blog/10-kubernetes-security-context-settings-you-should-understand/  
