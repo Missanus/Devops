@@ -6,21 +6,21 @@ vous ne devez jamais exécuter un conteneur en tant que root.
 
 ##### Option 1 : Utiliser l’utilisateur fourni dans l’image de base
 FROM node:slim
-COPY --chown=node . /home/node/app/   # <--- Copy app into the home directory with right ownership
-USER 1000                             # <--- Switch active user to “node” (by UID)
-WORKDIR /home/node/app                # <--- Switch current directory to app
-ENTRYPOINT ["npm", "start"]           # <--- This will now exec as the “node” user instead of root
+COPY --chown=node . /home/node/app/   # <--- Copy app into the home directory with right ownership  
+USER 1000                             # <--- Switch active user to “node” (by UID)  
+WORKDIR /home/node/app                # <--- Switch current directory to app  
+ENTRYPOINT ["npm", "start"]           # <--- This will now exec as the “node” user instead of root  
 
 
 ##### Option 2 : L’image de base ne fournit aucun utilisateur:
 FROM node:slim
-RUN useradd somebody -u 10001 --create-home --user-group  # <--- Create a user
-COPY --chown=somebody . /home/somebody/app/
-USER 10001
-WORKDIR /home/somebody/app
-ENTRYPOINT ["npm", "start"]
+RUN useradd somebody -u 10001 --create-home --user-group  # <--- Create a user  
+COPY --chown=somebody . /home/somebody/app/  
+USER 10001  
+WORKDIR /home/somebody/app    
+ENTRYPOINT ["npm", "start"]  
 
-### 2. runAsUser / runAsGroup [P/C]
+### 2. runAsUser / runAsGroup
 Les images de conteneur peuvent avoir un utilisateur et/ou un groupe spécifique configuré pour que le processus s’exécute en tant que
 ...  
 spec:  
