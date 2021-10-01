@@ -14,7 +14,8 @@ spec:
     volumeMounts:
     - mountPath: /tmp/volume
       name: busyvolume
-  
+    securityContext:
+      runAsUser: 2500
   - name: busynode2
     image: gcr.io/google-samples/node-hello:1.0
     args:
