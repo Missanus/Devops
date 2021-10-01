@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  storageClassName: manual      # manually reclaim the volume
+  capacity:
+    storage: 1G
+  accessModes:
+    - ReadWriteOnce             # read write par un seul pod
+  hostPath:                     # stockage au niveau du noeud 
+    path: "/tmp/pv1"            # chemin in node
+---
+kubectl get pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 500M
+---
