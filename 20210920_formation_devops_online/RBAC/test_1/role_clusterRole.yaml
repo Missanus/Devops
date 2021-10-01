@@ -1,0 +1,24 @@
+
+--- 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole                    # ce s"applqiue sur tout le cluster
+metadata:
+  name: clusterrole-nassim
+rules:
+ - apiGroups: [""]
+   resources: ["pods"]             # on l'applique sur les secrets 
+   verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secrets
+subjects:
+- kind: ServiceAccount
+  name: sa-nassim-test1
+  namespace: namespace-nassim
+roleRef:
+  kind: ClusterRole
+  name: clusterrole-nassim
+  apiGroup: rbac.authorization.k8s.io

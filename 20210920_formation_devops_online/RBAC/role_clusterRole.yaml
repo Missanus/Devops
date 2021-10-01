@@ -26,3 +26,4 @@ rules:
  - apiGroups: [""]
    resources: ["secrets"]             # on l'applique sur les secrets 
    verbs: ["get", "watch", "list"]
+---
