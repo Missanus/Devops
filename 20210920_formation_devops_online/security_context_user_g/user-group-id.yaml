@@ -15,9 +15,10 @@ spec:
     - mountPath: /tmp/volume
       name: busyvolume
     securityContext:
+      runAsNonRoot: true
       runAsGroup: 3000
       runAsUser: 2500
-      fsGroup: 2000
+      #fsGroup: 2000
       #fsGroupChangePolicy: "Always"  # propore a openshift
   - name: busynode2
     image: gcr.io/google-samples/node-hello:1.0
