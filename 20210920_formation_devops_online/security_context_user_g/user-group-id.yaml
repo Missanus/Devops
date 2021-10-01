@@ -5,8 +5,8 @@ metadata:
   name: busy-pod
 spec:
   containers:
-  - name: busy1
-    image: k8s.gcr.io/busybox
+  - name: busynode1
+    image: gcr.io/google-samples/node-hello:1.0
     args:
     - /bin/sh
     - -c
@@ -15,8 +15,8 @@ spec:
     - mountPath: /tmp/volume
       name: busyvolume
   
-  - name: busy2
-    image: k8s.gcr.io/busybox
+  - name: busynode2
+    image: gcr.io/google-samples/node-hello:1.0
     args:
     - /bin/sh
     - -c
